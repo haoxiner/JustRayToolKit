@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{2da2032a-0529-4897-b4c7-11ed1256d9a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ModelGroupGenerator">
+      <UniqueIdentifier>{584c7d55-3fc9-442d-b101-529037826eea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{cbae3824-9512-4e0b-86ac-b5a31fb95a54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PreIntegrator">
+      <UniqueIdentifier>{e46ba21d-cbed-491b-a48c-f68e4251ea2b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MathUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="TinyObjLoader.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelGroup.h">
+      <Filter>ModelGroupGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BBox.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Display.h">
+      <Filter>PreIntegrator</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>PreIntegrator</Filter>
+    </ClInclude>
+    <ClInclude Include="PreIntegrator.h">
+      <Filter>PreIntegrator</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubemap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Json.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TinyObjLoader.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelGroup.cpp">
+      <Filter>ModelGroupGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>ModelGroupGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BBox.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Display.cpp">
+      <Filter>PreIntegrator</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>PreIntegrator</Filter>
+    </ClCompile>
+    <ClCompile Include="PreIntegrator.cpp">
+      <Filter>PreIntegrator</Filter>
+    </ClCompile>
+    <ClCompile Include="Cubemap.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Json.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\PreIntegrator.cs.glsl">
+      <Filter>Shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>
