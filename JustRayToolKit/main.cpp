@@ -30,9 +30,7 @@ void PreIntegrate()
 
     JustRay::PreIntegrator preIntegrator;
     preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
-    preIntegrator.Output("../../Resources/output/pkg", "dfg");
     preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/uffizi/src", "uffizi", "../../Resources/output", "uffizi");
-    preIntegrator.Output("../../Resources/output/pkg", "uffizi.ibl");
 }
 void GenMaterial()
 {
@@ -96,7 +94,13 @@ void GenMaterial()
 }
 int main()
 {
-    GenMaterial();
-    PreIntegrate();
+    //GenMaterial();
+    //PreIntegrate();
+    std::ifstream file("H:\\haoxin\\Resources\\environment\\specular.ibl", std::ios::binary);
+    unsigned short h[4];
+    file.read((char*)h, sizeof(h));
+    for (int i = 0; i < 4; i++) {
+        cerr << h[i] << std::endl;
+    }
     return 0;
 }

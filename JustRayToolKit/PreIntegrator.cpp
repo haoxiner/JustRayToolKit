@@ -44,6 +44,8 @@ void PreIntegrator::IntegrateIBLDFG(const std::string& fileID, const std::string
     // write to file
     Save(outputTextureID, outputPath + "/" + fileID /*+ ".exr"*/, outputWidth, outputWidth, false, false);
     glDeleteTextures(1, &outputTextureID);
+
+    Output(outputWidth, outputWidth, 3, 0, outputPath, fileID);
 }
 
 void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirectory,
@@ -90,8 +92,10 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         glDeleteTextures(1, &outputTextureID);
     }
     computeShaderProgram.Shutdown();
+    Output(diffuseOutputWidth, diffuseOutputWidth, 3, 0, outputDirectory, "diffuse.ibl");
 
     const int outputMaxMipLevel = 6;
+    const int specularWidth = 512;
     int specularOutputWidth = 512;
     for (int level = 0; level <= outputMaxMipLevel; level++) {
         int local_size_x = std::min(specularOutputWidth, 32);
@@ -121,19 +125,16 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         std::cerr << level << ": " << specularOutputWidth << std::endl;
         specularOutputWidth /= 2;
     }
+    Output(specularWidth, specularWidth, 3, 0, outputDirectory, "specular.ibl");
     glDeleteBuffers(1, &argsBufferID);
 }
 
-void PreIntegrator::Output(const std::string& directory, const std::string& fileID)
+void PreIntegrator::Output(short w, short h, short channel, short maxMipLevel, const std::string& directory, const std::string& fileID)
 {
-    unsigned short w = 512;
-    unsigned short h = 512;
-    unsigned short numOfChannel = 3;
-    unsigned short maxMipLevel = 6;
     std::ofstream file(directory + "/" + fileID, std::ios::binary);
     file.write(reinterpret_cast<char*>(&w), sizeof(w));
     file.write(reinterpret_cast<char*>(&h), sizeof(h));
-    file.write(reinterpret_cast<char*>(&numOfChannel), sizeof(numOfChannel));
+    file.write(reinterpret_cast<char*>(&channel), sizeof(channel));
     file.write(reinterpret_cast<char*>(&maxMipLevel), sizeof(maxMipLevel));
     file.write(reinterpret_cast<char*>(output_.data()), output_.size() * sizeof(half));
     file.close();
@@ -153,14 +154,14 @@ void PreIntegrator::Save(GLuint textureID, const std::string& fileName, int widt
         FreeImage_FlipVertical(bitmap);
     }
 
-    auto offset = output_.size() * sizeof(half);
-    std::cerr << sizeof(half) << ", offset: " << offset << ", length: ";
+    //auto offset = output_.size() * sizeof(half);
+    //std::cerr << sizeof(half) << ", offset: " << offset << ", length: ";
     float* floatPixels = reinterpret_cast<float*>(pixels);
     for (int i = 0; i < width * height * 3; i++) {
         output_.emplace_back(half(floatPixels[i]));
     }
-    std::cerr << output_.size() * sizeof(half) - offset  << std::endl;
-    FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
+    //std::cerr << output_.size() * sizeof(half) - offset  << std::endl;
+    //FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
     FreeImage_Unload(bitmap);
 }
 }
