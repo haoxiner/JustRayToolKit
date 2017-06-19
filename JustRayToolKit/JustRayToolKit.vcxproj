@@ -145,6 +145,12 @@
   <ItemGroup>
     <ClInclude Include="Cubemap.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="Half\eLut.h" />
+    <ClInclude Include="Half\half.h" />
+    <ClInclude Include="Half\halfExport.h" />
+    <ClInclude Include="Half\halfFunction.h" />
+    <ClInclude Include="Half\halfLimits.h" />
+    <ClInclude Include="Half\toFloat.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Json.h" />
     <ClInclude Include="MathUtil.h" />
@@ -161,6 +167,13 @@
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="Cubemap.cpp" />
     <ClCompile Include="Display.cpp" />
+    <ClCompile Include="Half\eLut.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Half\half.cpp" />
+    <ClCompile Include="Half\toFloat.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Json.cpp" />
     <ClCompile Include="main.cpp" />
@@ -171,6 +184,7 @@
     <ClCompile Include="TinyObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\InverseMatrix.glsl" />
     <None Include="Shader\PreIntegrator.cs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

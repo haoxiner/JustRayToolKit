@@ -42,7 +42,7 @@ void PreIntegrator::IntegrateIBLDFG(const std::string& fileID, const std::string
     glDeleteBuffers(1, &argsBufferID);
 
     // write to file
-    Save(outputTextureID, outputPath + "/" + fileID + ".exr", outputWidth, outputWidth, false, false);
+    Save(outputTextureID, outputPath + "/" + fileID /*+ ".exr"*/, outputWidth, outputWidth, false, false);
     glDeleteTextures(1, &outputTextureID);
 }
 
@@ -86,7 +86,7 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         computeShaderProgram.Use();
         glDispatchCompute(diffuseOutputWidth / local_size_x, diffuseOutputWidth / local_size_y, local_size_z);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        Save(outputTextureID, outputDirectory + "/" + outputID + "_diffuse_" + FACE_NAME[face] + ".exr", diffuseOutputWidth, diffuseOutputWidth, true, true);
+        Save(outputTextureID, outputDirectory + "/" + outputID + "_diffuse_" + FACE_NAME[face]/* + ".exr"*/, diffuseOutputWidth, diffuseOutputWidth, true, true);
         glDeleteTextures(1, &outputTextureID);
     }
     computeShaderProgram.Shutdown();
@@ -114,7 +114,7 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
             computeSpecular.Use();
             glDispatchCompute(specularOutputWidth / local_size_x, specularOutputWidth / local_size_y, local_size_z);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            Save(outputTextureID, outputDirectory + "/" + outputID + "_specular_" + FACE_NAME[face] + (level > 0 ? ("_" + std::to_string(level)) : "") + ".exr", specularOutputWidth, specularOutputWidth, true, true);
+            Save(outputTextureID, outputDirectory + "/" + outputID + "_specular_" + FACE_NAME[face] + (level > 0 ? ("_" + std::to_string(level)) : "")/* + ".exr"*/, specularOutputWidth, specularOutputWidth, true, true);
             glDeleteTextures(1, &outputTextureID);
         }
         computeSpecular.Shutdown();
@@ -122,6 +122,22 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         specularOutputWidth /= 2;
     }
     glDeleteBuffers(1, &argsBufferID);
+}
+
+void PreIntegrator::Output(const std::string& directory, const std::string& fileID)
+{
+    unsigned short w = 512;
+    unsigned short h = 512;
+    unsigned short numOfChannel = 3;
+    unsigned short maxMipLevel = 6;
+    std::ofstream file(directory + "/" + fileID, std::ios::binary);
+    file.write(reinterpret_cast<char*>(&w), sizeof(w));
+    file.write(reinterpret_cast<char*>(&h), sizeof(h));
+    file.write(reinterpret_cast<char*>(&numOfChannel), sizeof(numOfChannel));
+    file.write(reinterpret_cast<char*>(&maxMipLevel), sizeof(maxMipLevel));
+    file.write(reinterpret_cast<char*>(output_.data()), output_.size() * sizeof(half));
+    file.close();
+    output_.clear();
 }
 
 void PreIntegrator::Save(GLuint textureID, const std::string& fileName, int width, int height, bool invertHorizontal, bool invertVertical)
@@ -136,7 +152,15 @@ void PreIntegrator::Save(GLuint textureID, const std::string& fileName, int widt
     if (invertVertical) {
         FreeImage_FlipVertical(bitmap);
     }
-    FreeImage_Save(FIF_EXR, bitmap, fileName.c_str(), EXR_DEFAULT);
+
+    auto offset = output_.size() * sizeof(half);
+    std::cerr << sizeof(half) << ", offset: " << offset << ", length: ";
+    float* floatPixels = reinterpret_cast<float*>(pixels);
+    for (int i = 0; i < width * height * 3; i++) {
+        output_.emplace_back(half(floatPixels[i]));
+    }
+    std::cerr << output_.size() * sizeof(half) - offset  << std::endl;
+    FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
     FreeImage_Unload(bitmap);
 }
 }

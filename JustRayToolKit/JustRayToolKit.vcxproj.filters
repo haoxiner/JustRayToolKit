@@ -13,6 +13,9 @@
     <Filter Include="PreIntegrator">
       <UniqueIdentifier>{e46ba21d-cbed-491b-a48c-f68e4251ea2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Half">
+      <UniqueIdentifier>{0e30bb6b-3fa9-42b1-b02a-8159ab1de523}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MathUtil.h">
@@ -54,6 +57,24 @@
     <ClInclude Include="ResourceManager.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Half\halfLimits.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="Half\half.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="Half\halfExport.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="Half\halfFunction.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="Half\eLut.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
+    <ClInclude Include="Half\toFloat.h">
+      <Filter>Common\Half</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TinyObjLoader.cpp">
@@ -89,9 +110,21 @@
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="Half\toFloat.cpp">
+      <Filter>Common\Half</Filter>
+    </ClCompile>
+    <ClCompile Include="Half\eLut.cpp">
+      <Filter>Common\Half</Filter>
+    </ClCompile>
+    <ClCompile Include="Half\half.cpp">
+      <Filter>Common\Half</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\PreIntegrator.cs.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\InverseMatrix.glsl">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

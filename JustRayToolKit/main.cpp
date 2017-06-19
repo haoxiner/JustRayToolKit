@@ -1,7 +1,9 @@
 #include "ModelGroup.h"
 #include "Display.h"
 #include "PreIntegrator.h"
+#include "FreeImage.h"
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 void ConvertObj()
@@ -27,11 +29,74 @@ void PreIntegrate()
     }
 
     JustRay::PreIntegrator preIntegrator;
-    preIntegrator.IntegrateIBLDFG("dfg", "../../output");
-    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/uffizi/src", "uffizi", "../../output", "uffizi");
+    preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
+    preIntegrator.Output("../../Resources/output/pkg", "dfg");
+    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/uffizi/src", "uffizi", "../../Resources/output", "uffizi");
+    preIntegrator.Output("../../Resources/output/pkg", "uffizi.ibl");
+}
+void GenMaterial()
+{
+    
+    {
+        std::vector<unsigned char> output;
+        std::string baseColorFilePath = "../../Resources/output/basecolor.exr";
+        auto bitmap = FreeImage_Load(FIF_EXR, baseColorFilePath.c_str());
+        auto bpp = FreeImage_GetBPP(bitmap);
+        std::cerr << bpp << std::endl;
+        auto width = FreeImage_GetWidth(bitmap);
+        auto height = FreeImage_GetHeight(bitmap);
+        auto bits = FreeImage_GetBits(bitmap);
+        float* floatPixels = reinterpret_cast<float*>(bits);
+        for (int i = 0; i < width * height * 4; i++) {
+            output.emplace_back(JustRay::MapToUnsignedByte(floatPixels[i]));
+        }
+        FreeImage_Unload(bitmap);
+        std::ofstream file("../../Resources/output/basecolorMetallic.raw", std::ios::binary);
+        unsigned short w = width;
+        unsigned short h = height;
+        unsigned short numOfChannel = 4;
+        unsigned short maxMipLevel = 0;
+        file.write(reinterpret_cast<char*>(&w), sizeof(w));
+        file.write(reinterpret_cast<char*>(&h), sizeof(h));
+        file.write(reinterpret_cast<char*>(&numOfChannel), sizeof(numOfChannel));
+        file.write(reinterpret_cast<char*>(&maxMipLevel), sizeof(maxMipLevel));
+        file.write(reinterpret_cast<char*>(output.data()), output.size());
+        file.close();
+    }
+    {
+        std::vector<unsigned char> output;
+        std::string roughnessFilePath = "../../Resources/output/roughness.exr";
+        auto bitmap = FreeImage_Load(FIF_EXR, roughnessFilePath.c_str());
+        auto bpp = FreeImage_GetBPP(bitmap);
+        std::cerr << bpp << std::endl;
+        auto width = FreeImage_GetWidth(bitmap);
+        auto height = FreeImage_GetHeight(bitmap);
+        auto bits = FreeImage_GetBits(bitmap);
+        float* floatPixels = reinterpret_cast<float*>(bits);
+        for (int i = 0; i < width * height * 1; i++) {
+            output.emplace_back(JustRay::MapToUnsignedByte(0));
+            output.emplace_back(JustRay::MapToUnsignedByte(0));
+            output.emplace_back(JustRay::MapToUnsignedByte(1));
+            output.emplace_back(JustRay::MapToUnsignedByte(floatPixels[i]));
+        }
+        FreeImage_Unload(bitmap);
+        std::ofstream file("../../Resources/output/normalRoughness.raw", std::ios::binary);
+        unsigned short w = width;
+        unsigned short h = height;
+        unsigned short numOfChannel = 4;
+        unsigned short maxMipLevel = 0;
+        file.write(reinterpret_cast<char*>(&w), sizeof(w));
+        file.write(reinterpret_cast<char*>(&h), sizeof(h));
+        file.write(reinterpret_cast<char*>(&numOfChannel), sizeof(numOfChannel));
+        file.write(reinterpret_cast<char*>(&maxMipLevel), sizeof(maxMipLevel));
+        file.write(reinterpret_cast<char*>(output.data()), output.size());
+        file.close();
+    }
+
 }
 int main()
 {
-    ConvertObj();
+    GenMaterial();
+    PreIntegrate();
     return 0;
 }

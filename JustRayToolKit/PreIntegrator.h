@@ -2,8 +2,10 @@
 #include "Cubemap.h"
 #include "MathUtil.h"
 #include "ShaderProgram.h"
+#include "Half\half.h"
 #include "Platform.h"
 #include <string>
+#include <vector>
 namespace JustRay
 {
 class PreIntegrator
@@ -14,6 +16,7 @@ public:
                                         const std::string& inputID,
                                         const std::string& outputDirectory,
                                         const std::string& outputID);
+    void Output(const std::string& directory, const std::string& fileID);
 private:
     void Save(GLuint textureID, const std::string& fileName, int width, int height, bool invertHorizontal, bool invertVertical);
     struct ArgumentsBlock
@@ -21,5 +24,6 @@ private:
         Float4 inputArg0;
         Float4 inputArg1;
     };
+    std::vector<half> output_;
 };
 }

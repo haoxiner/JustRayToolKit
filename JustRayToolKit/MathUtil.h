@@ -201,6 +201,16 @@ inline unsigned short MapToUnsignedShort(float value)
 }
 
 /*
+map float of [0.0, 1.0] to unsigned char
+*/
+inline unsigned char MapToUnsignedByte(float value)
+{
+    value = std::min(1.0f, std::max(0.0f, value));
+    constexpr float mapToPositive = 255.0f;
+    return static_cast<short>(mapToPositive * value + 0.5f);
+}
+
+/*
 map float of [-1.0, 1.0] to 10 bit int
 */
 inline int MapTo10BitInt(float value)
