@@ -18,6 +18,8 @@ public:
                                         const std::string& outputID);
 private:
     void Output(short w, short h, short channel, short maxMipLevel, const std::string& directory, const std::string& fileID);
+    void OutputFloat(short w, short h, short channel, short maxMipLevel, const std::string& directory, const std::string& fileID);
+
 private:
     void Save(GLuint textureID, const std::string& fileName, int width, int height, bool invertHorizontal, bool invertVertical);
     struct ArgumentsBlock
@@ -26,5 +28,6 @@ private:
         Float4 inputArg1;
     };
     std::vector<half> output_;
+    std::vector<float> outputFloat_;
 };
 }

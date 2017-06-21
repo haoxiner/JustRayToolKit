@@ -195,9 +195,10 @@ map float of [0.0, 1.0] to unsigned short
 */
 inline unsigned short MapToUnsignedShort(float value)
 {
-    value = std::min(1.0f, std::max(0.0f, value));
+    //value = std::min(1.0f, std::max(0.0f, value));
     constexpr float mapToPositive = 65535.0f;
-    return static_cast<short>(mapToPositive * value + 0.5f);
+    constexpr float mapToNegative = -65535.0f;
+    return static_cast<unsigned short>((value >= 0 ? mapToPositive * value + 0.5f : -(mapToNegative * value + 0.5f)));
 }
 
 /*

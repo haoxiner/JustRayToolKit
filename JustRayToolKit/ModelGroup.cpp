@@ -2,6 +2,7 @@
 #include "TinyObjLoader.h"
 #include "MathUtil.h"
 #include "BBox.h"
+#include "glm/gtx/wrap.hpp"
 #include <iostream>
 #include <fstream>
 namespace JustRay
@@ -23,7 +24,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
     }
     int numOfVertices = attrib.vertices.size() / 3;
     std::cerr << "obj vertices: " << numOfVertices << std::endl;
-
+    std::ofstream log("../../Resources/log.txt");
     // combine equal vertices
     std::map<Vertex, int> vertexMap;
     std::vector<Float2> texCoords;
@@ -45,12 +46,29 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
                 float nz = attrib.normals[3 * idx.normal_index + 2];
                 float tx = attrib.texcoords[2 * idx.texcoord_index + 0];
                 float ty = attrib.texcoords[2 * idx.texcoord_index + 1];
+                log << tx << ", " << ty << ":             ";
+                //while (tx > 1.0f) {
+                //    tx -= 1.0f;
+                //}
+                //while (tx < 0.0f) {
+                //    tx += 1.0f;
+                //}
+                //while (ty > 1.0f) {
+                //    ty -= 1.0f;
+                //}
+                //while (ty < 0.0f) {
+                //    ty += 1.0f;
+                //}
+                //auto vt = glm::repeat(glm::vec2(tx, ty));
+                //tx = vt.x;
+                //ty = vt.y;
+                //log << tx << ", " << ty << std::endl;
                 Vertex vertex = {
                     { vx,vy,vz },
                     PackFloat3ToInt2_10_10_10({ nx,ny,nz }),
                     PackFloat3ToInt2_10_10_10({ 0,0,0 }),
                     PackFloat3ToInt2_10_10_10({ 0,0,0 }),
-                    MapToUnsignedShort(tx), MapToUnsignedShort(ty)
+                    half(tx), half(ty)
                 };
                 bbox_.Union(vertex.position);
                 auto vMapIter = vertexMap.find(vertex);

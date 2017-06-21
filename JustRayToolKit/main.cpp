@@ -9,9 +9,9 @@ using namespace std;
 void ConvertObj()
 {
     JustRay::ModelGroup modelGroup;
-    bool ret = modelGroup.LoadFromObj("../../output/mitsuba.obj");
+    bool ret = modelGroup.LoadFromObj("../../Resources/output/model/mitsuba.obj");
     if (ret) {
-        auto result = modelGroup.WriteToFile("../../output/mistuba.mg");
+        auto result = modelGroup.WriteToFile("../../Resources/output/model/mistuba.mg");
 
         std::cerr << "NUM OF Vertices: " << modelGroup.GetNumOfVertices() << std::endl;
         std::cerr << "NUM OF INDICES: " << modelGroup.GetNumOfIndices() << std::endl;
@@ -32,26 +32,38 @@ void PreIntegrate()
     preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
     preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/uffizi/src", "uffizi", "../../Resources/output", "uffizi");
 }
-void GenMaterial()
+void GenMaterial(const std::string& inputDirectory, const std::string& outputDirectory)
 {
     
     {
         std::vector<unsigned char> output;
-        std::string baseColorFilePath = "../../Resources/output/basecolor.exr";
-        auto bitmap = FreeImage_Load(FIF_EXR, baseColorFilePath.c_str());
-        auto bpp = FreeImage_GetBPP(bitmap);
-        std::cerr << bpp << std::endl;
-        auto width = FreeImage_GetWidth(bitmap);
-        auto height = FreeImage_GetHeight(bitmap);
-        auto bits = FreeImage_GetBits(bitmap);
-        float* floatPixels = reinterpret_cast<float*>(bits);
-        for (int i = 0; i < width * height * 4; i++) {
-            output.emplace_back(JustRay::MapToUnsignedByte(floatPixels[i]));
+        std::string basecolorFilePath = inputDirectory + "/basecolor.exr";
+        auto basecolorBitmap = FreeImage_Load(FIF_EXR, basecolorFilePath.c_str());
+        auto basecolorBPP = FreeImage_GetBPP(basecolorBitmap);
+        std::cerr << "basecolor bpp: " << basecolorBPP << std::endl;
+        auto basecolorWidth = FreeImage_GetWidth(basecolorBitmap);
+        auto basecolorHeight = FreeImage_GetHeight(basecolorBitmap);
+        auto basecolorBits = FreeImage_GetBits(basecolorBitmap);
+
+        std::string metallicFilePath = inputDirectory + "/metallic.exr";
+        auto metallicBitmap = FreeImage_Load(FIF_EXR, metallicFilePath.c_str());
+        auto metallicBPP = FreeImage_GetBPP(metallicBitmap);
+        auto metallicBits = FreeImage_GetBits(metallicBitmap);
+        std::cerr << "metallic bpp: " << metallicBPP << std::endl;
+
+        float* basecolorFloats = reinterpret_cast<float*>(basecolorBits);
+        float* metallicFloats = reinterpret_cast<float*>(metallicBits);
+        for (int i = 0; i < basecolorWidth * basecolorHeight; i++) {
+            output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32)]));
+            output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32) + 1]));
+            output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32) + 2]));
+            output.emplace_back(JustRay::MapToUnsignedByte(metallicFloats[i * (metallicBPP / 32)]));
         }
-        FreeImage_Unload(bitmap);
-        std::ofstream file("../../Resources/output/basecolorMetallic.raw", std::ios::binary);
-        unsigned short w = width;
-        unsigned short h = height;
+        FreeImage_Unload(basecolorBitmap);
+        FreeImage_Unload(metallicBitmap);
+        std::ofstream file(outputDirectory + "/basecolor.rgba8", std::ios::binary);
+        unsigned short w = basecolorWidth;
+        unsigned short h = basecolorHeight;
         unsigned short numOfChannel = 4;
         unsigned short maxMipLevel = 0;
         file.write(reinterpret_cast<char*>(&w), sizeof(w));
@@ -63,24 +75,35 @@ void GenMaterial()
     }
     {
         std::vector<unsigned char> output;
-        std::string roughnessFilePath = "../../Resources/output/roughness.exr";
-        auto bitmap = FreeImage_Load(FIF_EXR, roughnessFilePath.c_str());
-        auto bpp = FreeImage_GetBPP(bitmap);
-        std::cerr << bpp << std::endl;
-        auto width = FreeImage_GetWidth(bitmap);
-        auto height = FreeImage_GetHeight(bitmap);
-        auto bits = FreeImage_GetBits(bitmap);
-        float* floatPixels = reinterpret_cast<float*>(bits);
-        for (int i = 0; i < width * height * 1; i++) {
-            output.emplace_back(JustRay::MapToUnsignedByte(0));
-            output.emplace_back(JustRay::MapToUnsignedByte(0));
-            output.emplace_back(JustRay::MapToUnsignedByte(1));
-            output.emplace_back(JustRay::MapToUnsignedByte(floatPixels[i]));
+        std::string roughnessFilePath = inputDirectory + "/roughness.exr";
+        auto roughnessBitmap = FreeImage_Load(FIF_EXR, roughnessFilePath.c_str());
+        auto roughnessBPP = FreeImage_GetBPP(roughnessBitmap);
+        std::cerr << "Roughness bpp: " << roughnessBPP << std::endl;
+        auto roughnessWidth = FreeImage_GetWidth(roughnessBitmap);
+        auto roughnessHeight = FreeImage_GetHeight(roughnessBitmap);
+        auto roughnessBits = FreeImage_GetBits(roughnessBitmap);
+
+        std::string normalFilePath = inputDirectory + "/normal.exr";
+        auto normalBitmap = FreeImage_Load(FIF_EXR, normalFilePath.c_str());
+        auto normalBPP = FreeImage_GetBPP(normalBitmap);
+        auto normalBits = FreeImage_GetBits(normalBitmap);
+        std::cerr << "Normal bpp: " << normalBPP << std::endl;
+
+        float* roughnessFloats = reinterpret_cast<float*>(roughnessBits);
+        float* normalFloats = reinterpret_cast<float*>(normalBits);
+
+        
+        for (int i = 0; i < roughnessWidth * roughnessHeight; i++) {
+            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32)]));
+            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32) + 1]));
+            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32) + 2]));
+            output.emplace_back(JustRay::MapToUnsignedByte(roughnessFloats[i * (roughnessBPP / 32)]));
         }
-        FreeImage_Unload(bitmap);
-        std::ofstream file("../../Resources/output/normalRoughness.raw", std::ios::binary);
-        unsigned short w = width;
-        unsigned short h = height;
+        FreeImage_Unload(roughnessBitmap);
+        FreeImage_Unload(normalBitmap);
+        std::ofstream file(outputDirectory + "/roughness.rgba8", std::ios::binary);
+        unsigned short w = roughnessWidth;
+        unsigned short h = roughnessHeight;
         unsigned short numOfChannel = 4;
         unsigned short maxMipLevel = 0;
         file.write(reinterpret_cast<char*>(&w), sizeof(w));
@@ -94,13 +117,10 @@ void GenMaterial()
 }
 int main()
 {
-    //GenMaterial();
+    GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
+    GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
+
     //PreIntegrate();
-    std::ifstream file("H:\\haoxin\\Resources\\environment\\specular.ibl", std::ios::binary);
-    unsigned short h[4];
-    file.read((char*)h, sizeof(h));
-    for (int i = 0; i < 4; i++) {
-        cerr << h[i] << std::endl;
-    }
+    //ConvertObj();
     return 0;
 }

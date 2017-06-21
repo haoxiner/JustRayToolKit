@@ -125,7 +125,7 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         std::cerr << level << ": " << specularOutputWidth << std::endl;
         specularOutputWidth /= 2;
     }
-    Output(specularWidth, specularWidth, 3, 0, outputDirectory, "specular.ibl");
+    Output(specularWidth, specularWidth, 3, outputMaxMipLevel, outputDirectory, "specular.ibl");
     glDeleteBuffers(1, &argsBufferID);
 }
 
@@ -139,28 +139,38 @@ void PreIntegrator::Output(short w, short h, short channel, short maxMipLevel, c
     file.write(reinterpret_cast<char*>(output_.data()), output_.size() * sizeof(half));
     file.close();
     output_.clear();
+    OutputFloat(w, h, channel, maxMipLevel, directory, fileID);
 }
-
+void PreIntegrator::OutputFloat(short w, short h, short channel, short maxMipLevel, const std::string& directory, const std::string& fileID)
+{
+    std::ofstream file(directory + "/" + fileID + ".float", std::ios::binary);
+    file.write(reinterpret_cast<char*>(&w), sizeof(w));
+    file.write(reinterpret_cast<char*>(&h), sizeof(h));
+    file.write(reinterpret_cast<char*>(&channel), sizeof(channel));
+    file.write(reinterpret_cast<char*>(&maxMipLevel), sizeof(maxMipLevel));
+    file.write(reinterpret_cast<char*>(outputFloat_.data()), outputFloat_.size() * sizeof(float));
+    file.close();
+    outputFloat_.clear();
+}
 void PreIntegrator::Save(GLuint textureID, const std::string& fileName, int width, int height, bool invertHorizontal, bool invertVertical)
 {
     auto texSize = sizeof(float) * 3 * width * height;
     auto bitmap = FreeImage_AllocateT(FIT_RGBF, width, height);
     auto pixels = FreeImage_GetBits(bitmap);
     glGetTextureImage(textureID, 0, GL_RGB, GL_FLOAT, texSize, pixels);
+    //std::ofstream log(fileName + ".log");
+    float* floatPixels = reinterpret_cast<float*>(pixels);
+    for (int i = 0; i < width * height * 3; i++) {
+        outputFloat_.emplace_back(floatPixels[i]);
+        output_.emplace_back(half(floatPixels[i]));
+        //log << outputFloat_.back() << ", " << (float)output_.back() << std::endl;;
+    }
     if (invertHorizontal) {
         FreeImage_FlipHorizontal(bitmap);
     }
     if (invertVertical) {
         FreeImage_FlipVertical(bitmap);
     }
-
-    //auto offset = output_.size() * sizeof(half);
-    //std::cerr << sizeof(half) << ", offset: " << offset << ", length: ";
-    float* floatPixels = reinterpret_cast<float*>(pixels);
-    for (int i = 0; i < width * height * 3; i++) {
-        output_.emplace_back(half(floatPixels[i]));
-    }
-    //std::cerr << output_.size() * sizeof(half) - offset  << std::endl;
     //FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
     FreeImage_Unload(bitmap);
 }
