@@ -67,7 +67,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
                     { vx,vy,vz },
                     PackFloat3ToInt2_10_10_10({ nx,ny,nz }),
                     PackFloat3ToInt2_10_10_10({ 0,0,0 }),
-                    PackFloat3ToInt2_10_10_10({ 0,0,0 }),
+                    //PackFloat3ToInt2_10_10_10({ 0,0,0 }),
                     half(tx), half(ty)
                 };
                 bbox_.Union(vertex.position);
@@ -118,7 +118,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
         vertices[i].tangent = PackFloat3ToInt2_10_10_10(Normalize(tangents[i]));
     }
     for (int i = 0; i < vertices.size(); i++) {
-        vertices[i].bitangent = PackFloat3ToInt2_10_10_10(Normalize(bitangents[i]));
+        //vertices[i].bitangent = PackFloat3ToInt2_10_10_10(Normalize(bitangents[i]));
     }
     return true;
 }

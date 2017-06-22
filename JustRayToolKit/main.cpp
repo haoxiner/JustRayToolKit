@@ -117,10 +117,10 @@ void GenMaterial(const std::string& inputDirectory, const std::string& outputDir
 }
 int main()
 {
-    GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
-    GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
+    //GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
+    //GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
 
     //PreIntegrate();
-    //ConvertObj();
+    ConvertObj();
     return 0;
 }
