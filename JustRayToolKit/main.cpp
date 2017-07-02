@@ -9,9 +9,9 @@ using namespace std;
 void ConvertObj()
 {
     JustRay::ModelGroup modelGroup;
-    bool ret = modelGroup.LoadFromObj("../../Resources/output/model/mitsuba.obj");
+    bool ret = modelGroup.LoadFromObj("D:/Download/Resources/src/DP2/src/dp2.obj");
     if (ret) {
-        auto result = modelGroup.WriteToFile("../../Resources/output/model/mistuba.mg");
+        auto result = modelGroup.WriteToFile("D:/Download/Resources/src/DP2/src/dp2.mg");
 
         std::cerr << "NUM OF Vertices: " << modelGroup.GetNumOfVertices() << std::endl;
         std::cerr << "NUM OF INDICES: " << modelGroup.GetNumOfIndices() << std::endl;
@@ -29,8 +29,8 @@ void PreIntegrate()
     }
 
     JustRay::PreIntegrator preIntegrator;
-    preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
-    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/uffizi/src", "uffizi", "../../Resources/output", "uffizi");
+    //preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
+    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/doge2/src", "doge2", "../../Resources/output", "doge2");
 }
 void GenMaterial(const std::string& inputDirectory, const std::string& outputDirectory)
 {
@@ -119,7 +119,7 @@ int main()
 {
     //GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
     //GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
-
+    //GenMaterial("D:/Download/Resources/src/green", "D:/Download/Resources/src/green");
     //PreIntegrate();
     ConvertObj();
     return 0;

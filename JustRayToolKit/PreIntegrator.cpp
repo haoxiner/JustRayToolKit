@@ -165,13 +165,13 @@ void PreIntegrator::Save(GLuint textureID, const std::string& fileName, int widt
         output_.emplace_back(half(floatPixels[i]));
         //log << outputFloat_.back() << ", " << (float)output_.back() << std::endl;;
     }
-    if (invertHorizontal) {
-        FreeImage_FlipHorizontal(bitmap);
-    }
-    if (invertVertical) {
-        FreeImage_FlipVertical(bitmap);
-    }
-    //FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
+    //if (invertHorizontal) {
+    //    FreeImage_FlipHorizontal(bitmap);
+    //}
+    //if (invertVertical) {
+    //    FreeImage_FlipVertical(bitmap);
+    //}
+    FreeImage_Save(FIF_EXR, bitmap, (fileName + ".exr").c_str(), EXR_DEFAULT);
     FreeImage_Unload(bitmap);
 }
 }

@@ -24,13 +24,14 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
     }
     int numOfVertices = attrib.vertices.size() / 3;
     std::cerr << "obj vertices: " << numOfVertices << std::endl;
-    std::ofstream log("../../Resources/log.txt");
+    //std::ofstream log("../../Resources/log.txt");
     // combine equal vertices
     std::map<Vertex, int> vertexMap;
     std::vector<Float2> texCoords;
     for (size_t shapeIdx = 0; shapeIdx < shapes.size(); shapeIdx++) {
-        size_t indexOffset = 0;
-        for (size_t f = 0; f < shapes[shapeIdx].mesh.num_face_vertices.size(); f++) {
+        int meshIndexOffset = indices_.size();
+        std::cerr << "mesh index offset: " << meshIndexOffset << std::endl;
+        for (size_t f = 0, indexOffset = 0; f < shapes[shapeIdx].mesh.num_face_vertices.size(); f++) {
             int fv = shapes[shapeIdx].mesh.num_face_vertices[f];
             if (fv != 3) {
                 std::cerr << "Only support triangle mesh. " << std::endl;
@@ -46,33 +47,17 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
                 float nz = attrib.normals[3 * idx.normal_index + 2];
                 float tx = attrib.texcoords[2 * idx.texcoord_index + 0];
                 float ty = attrib.texcoords[2 * idx.texcoord_index + 1];
-                log << tx << ", " << ty << ":             ";
-                //while (tx > 1.0f) {
-                //    tx -= 1.0f;
-                //}
-                //while (tx < 0.0f) {
-                //    tx += 1.0f;
-                //}
-                //while (ty > 1.0f) {
-                //    ty -= 1.0f;
-                //}
-                //while (ty < 0.0f) {
-                //    ty += 1.0f;
-                //}
-                //auto vt = glm::repeat(glm::vec2(tx, ty));
-                //tx = vt.x;
-                //ty = vt.y;
-                //log << tx << ", " << ty << std::endl;
                 Vertex vertex = {
                     { vx,vy,vz },
                     PackFloat3ToInt2_10_10_10({ nx,ny,nz }),
                     PackFloat3ToInt2_10_10_10({ 0,0,0 }),
-                    //PackFloat3ToInt2_10_10_10({ 0,0,0 }),
+                    PackFloat3ToInt2_10_10_10({ 0,0,0 }),
                     half(tx), half(ty)
                 };
-                bbox_.Union(vertex.position);
+                
                 auto vMapIter = vertexMap.find(vertex);
                 if (vMapIter == vertexMap.end()) {
+                    bbox_.Union(vertex.position);
                     int index = static_cast<int>(vertices.size());
                     indices_.emplace_back(index);
                     vertexMap[vertex] = index;
@@ -84,6 +69,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
             }
             indexOffset += fv;
         }
+        std::cerr << "index count: " << indices_.size() - meshIndexOffset << std::endl;
     }
     std::vector<Float3> tangents(vertices.size(), Float3(0,0,0));
     std::vector<Float3> bitangents(vertices.size(), Float3(0,0,0));
@@ -118,18 +104,31 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
         vertices[i].tangent = PackFloat3ToInt2_10_10_10(Normalize(tangents[i]));
     }
     for (int i = 0; i < vertices.size(); i++) {
-        //vertices[i].bitangent = PackFloat3ToInt2_10_10_10(Normalize(bitangents[i]));
+        vertices[i].bitangent = PackFloat3ToInt2_10_10_10(Normalize(bitangents[i]));
     }
     return true;
 }
 std::tuple<int, int> ModelGroup::WriteToFile(const std::string& filepath)
 {
+    Float3 center = (bbox_.maxPoint + bbox_.minPoint) * 0.5f;
+    Float3 scaleVec = bbox_.maxPoint - bbox_.minPoint;
+    float scale = 0.5f * std::max(std::max(std::abs(scaleVec.x), std::abs(scaleVec.y)), std::abs(scaleVec.z));
+    for (auto&& v : vertices) {
+        v.position -= center;
+        v.position /= scale;
+    }
+    std::cerr << "SCALE:\n";
+    std::cerr << center.x << ", " << center.y << ", " << center.z << std::endl;
+    std::cerr << scale << std::endl;
+
     std::ofstream output(filepath, std::ios::binary);
     int sizeOfVertices = sizeof(Vertex) * vertices.size();
     output.write(reinterpret_cast<char*>(vertices.data()), sizeOfVertices);
     int sizeOfIndices = sizeof(unsigned int) * indices_.size();
     output.write(reinterpret_cast<char*>(indices_.data()), sizeOfIndices);
-    std::cerr << indices_[0] << "," << indices_[1];
+
+    std::cerr << "BBox min: " << bbox_.minPoint.x << ", " << bbox_.minPoint.y << ", " << bbox_.minPoint.z << std::endl;
+    std::cerr << "BBox max: " << bbox_.maxPoint.x << ", " << bbox_.maxPoint.y << ", " << bbox_.maxPoint.z << std::endl;
     return std::make_tuple(0, sizeOfVertices);
 }
 }
