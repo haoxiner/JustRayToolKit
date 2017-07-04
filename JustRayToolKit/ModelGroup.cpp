@@ -29,6 +29,8 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
     std::map<Vertex, int> vertexMap;
     std::vector<Float2> texCoords;
     for (size_t shapeIdx = 0; shapeIdx < shapes.size(); shapeIdx++) {
+        
+        std::cerr << "mesh: " << shapes[shapeIdx].name << std::endl;
         int meshIndexOffset = indices_.size();
         std::cerr << "mesh index offset: " << meshIndexOffset << std::endl;
         for (size_t f = 0, indexOffset = 0; f < shapes[shapeIdx].mesh.num_face_vertices.size(); f++) {
@@ -70,6 +72,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
             indexOffset += fv;
         }
         std::cerr << "index count: " << indices_.size() - meshIndexOffset << std::endl;
+        meshes_.emplace_back(shapes[shapeIdx].name, meshIndexOffset, indices_.size() - meshIndexOffset);
     }
     std::vector<Float3> tangents(vertices.size(), Float3(0,0,0));
     std::vector<Float3> bitangents(vertices.size(), Float3(0,0,0));
@@ -108,7 +111,7 @@ bool ModelGroup::LoadFromObj(const std::string& filepath)
     }
     return true;
 }
-std::tuple<int, int> ModelGroup::WriteToFile(const std::string& filepath)
+std::tuple<int, int> ModelGroup::WriteToFile(const std::string& directory, const std::string& fileID)
 {
     Float3 center = (bbox_.maxPoint + bbox_.minPoint) * 0.5f;
     Float3 scaleVec = bbox_.maxPoint - bbox_.minPoint;
@@ -121,7 +124,7 @@ std::tuple<int, int> ModelGroup::WriteToFile(const std::string& filepath)
     std::cerr << center.x << ", " << center.y << ", " << center.z << std::endl;
     std::cerr << scale << std::endl;
 
-    std::ofstream output(filepath, std::ios::binary);
+    std::ofstream output(directory + "/" + fileID + ".mg", std::ios::binary);
     int sizeOfVertices = sizeof(Vertex) * vertices.size();
     output.write(reinterpret_cast<char*>(vertices.data()), sizeOfVertices);
     int sizeOfIndices = sizeof(unsigned int) * indices_.size();
@@ -129,6 +132,23 @@ std::tuple<int, int> ModelGroup::WriteToFile(const std::string& filepath)
 
     std::cerr << "BBox min: " << bbox_.minPoint.x << ", " << bbox_.minPoint.y << ", " << bbox_.minPoint.z << std::endl;
     std::cerr << "BBox max: " << bbox_.maxPoint.x << ", " << bbox_.maxPoint.y << ", " << bbox_.maxPoint.z << std::endl;
+
+    std::ofstream jsonFile(directory + "/" + fileID + ".json");
+    jsonFile << "{\n    \"num_of_vertex\": " << GetNumOfVertices() << ",\n    \"num_of_index\": " << GetNumOfIndices() << ",\n    \"model\": [\n    ";
+
+    for (int i = 0; i < meshes_.size(); i++) {
+        jsonFile << "{\n    \"name\":" << "\"" << std::get<0>(meshes_[i]) << "\",\n    ";
+        jsonFile << "\"index_offset\":" << std::get<1>(meshes_[i]) << ",\n    ";
+        jsonFile << "\"index_count\":" << std::get<2>(meshes_[i]) << ",\n    ";
+        jsonFile << "\"material\":" << "\"" << "brushed_metal" << "\",\n    ";
+        jsonFile << "\"uv_scale\":" << "1.0" << "\n    ";
+        jsonFile << "}";
+        if (i < meshes_.size() - 1) {
+            jsonFile << ",";
+        }
+    }
+    jsonFile << "]\n}";
+
     return std::make_tuple(0, sizeOfVertices);
 }
 }
