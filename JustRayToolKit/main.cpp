@@ -9,9 +9,9 @@ using namespace std;
 void ConvertObj()
 {
     JustRay::ModelGroup modelGroup;
-    bool ret = modelGroup.LoadFromObj("D:/Download/Resources/src/DP2/src/dp2.obj");
+    bool ret = modelGroup.LoadFromObj("F:/haoxin/Cerberus_by_Andrew_Maximov/shotgun.obj");
     if (ret) {
-        auto result = modelGroup.WriteToFile("D:/Download/Resources/src/DP2/src/dp2.mg");
+        auto result = modelGroup.WriteToFile("F:/haoxin/Cerberus_by_Andrew_Maximov/shotgun.mg");
 
         std::cerr << "NUM OF Vertices: " << modelGroup.GetNumOfVertices() << std::endl;
         std::cerr << "NUM OF INDICES: " << modelGroup.GetNumOfIndices() << std::endl;
@@ -30,9 +30,17 @@ void PreIntegrate()
 
     JustRay::PreIntegrator preIntegrator;
     //preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
-    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/doge2/src", "doge2", "../../Resources/output", "doge2");
+    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/pisa/src", "pisa", "../../Resources/output", "pisa");
 }
-void GenMaterial(const std::string& inputDirectory, const std::string& outputDirectory)
+float MaterialGamma(float v, bool apply)
+{
+    //std::cerr << v << ", ";
+    if (apply) {
+        return std::powf(v, 1.0 / 2.2);
+    }
+    return v;
+}
+void GenMaterial(const std::string& inputDirectory, const std::string& outputDirectory, bool gamma = false)
 {
     
     {
@@ -57,7 +65,7 @@ void GenMaterial(const std::string& inputDirectory, const std::string& outputDir
             output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32)]));
             output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32) + 1]));
             output.emplace_back(JustRay::MapToUnsignedByte(basecolorFloats[i * (basecolorBPP / 32) + 2]));
-            output.emplace_back(JustRay::MapToUnsignedByte(metallicFloats[i * (metallicBPP / 32)]));
+            output.emplace_back(JustRay::MapToUnsignedByte(MaterialGamma(metallicFloats[i * (metallicBPP / 32)], gamma)));
         }
         FreeImage_Unload(basecolorBitmap);
         FreeImage_Unload(metallicBitmap);
@@ -94,10 +102,10 @@ void GenMaterial(const std::string& inputDirectory, const std::string& outputDir
 
         
         for (int i = 0; i < roughnessWidth * roughnessHeight; i++) {
-            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32)]));
-            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32) + 1]));
-            output.emplace_back(JustRay::MapToUnsignedByte(normalFloats[i * (normalBPP/32) + 2]));
-            output.emplace_back(JustRay::MapToUnsignedByte(roughnessFloats[i * (roughnessBPP / 32)]));
+            output.emplace_back(JustRay::MapToUnsignedByte(MaterialGamma(normalFloats[i * (normalBPP/32)], gamma)));
+            output.emplace_back(JustRay::MapToUnsignedByte(MaterialGamma(normalFloats[i * (normalBPP/32) + 1], gamma)));
+            output.emplace_back(JustRay::MapToUnsignedByte(MaterialGamma(normalFloats[i * (normalBPP/32) + 2], gamma)));
+            output.emplace_back(JustRay::MapToUnsignedByte(MaterialGamma(roughnessFloats[i * (roughnessBPP / 32)], gamma)));
         }
         FreeImage_Unload(roughnessBitmap);
         FreeImage_Unload(normalBitmap);
@@ -119,8 +127,8 @@ int main()
 {
     //GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
     //GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
-    //GenMaterial("D:/Download/Resources/src/green", "D:/Download/Resources/src/green");
+    GenMaterial("F:/haoxin/Cerberus_by_Andrew_Maximov", "F:/haoxin/Cerberus_by_Andrew_Maximov", true);
     //PreIntegrate();
-    ConvertObj();
+    //ConvertObj();
     return 0;
 }
