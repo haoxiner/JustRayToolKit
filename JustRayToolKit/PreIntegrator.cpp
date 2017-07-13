@@ -53,8 +53,8 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
                                                           const std::string& outputDirectory,
                                                           const std::string& outputID)
 {
-    const int diffuseOutputWidth = 64;
-    const int samplesPerPixel = 1024 * 4;
+    const int diffuseOutputWidth = 32;
+    const int samplesPerPixel = 1;
 
     const std::string FACE_NAME[] = { "PX", "NX", "PY", "NY", "PZ", "NZ" };
     // arguments buffer
@@ -74,7 +74,7 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
     computeShaderProgram.Startup(shaderSource_, local_size_x, local_size_y, local_size_z, { "INTEGRATE_DIFFUSE" });
     for (int face = 0; face < 6; face++) {
         auto inputBuffer = reinterpret_cast<ArgumentsBlock*>(glMapNamedBuffer(argsBufferID, GL_WRITE_ONLY));
-        inputBuffer->inputArg0 = { cubemap.GetWidth(), diffuseOutputWidth, samplesPerPixel, 0 };
+        inputBuffer->inputArg0 = { cubemap.GetWidth(), diffuseOutputWidth, samplesPerPixel * 1024 * 1024, 0 };
         inputBuffer->inputArg1.x = cubemap.GetMaxMipLevel();
         inputBuffer->inputArg1.y = 0;
         inputBuffer->inputArg1.z = 0;
@@ -105,7 +105,7 @@ void PreIntegrator::IntegrateIBLDiffuseAndSpecular(const std::string& inputDirec
         computeSpecular.Startup(shaderSource_, local_size_x, local_size_y, local_size_z, { "INTEGRATE_SPECULAR" });
         for (int face = 0; face < 6; face++) {
             auto inputBuffer = reinterpret_cast<ArgumentsBlock*>(glMapNamedBuffer(argsBufferID, GL_WRITE_ONLY));
-            inputBuffer->inputArg0 = { cubemap.GetWidth(), specularOutputWidth, samplesPerPixel, 0 };
+            inputBuffer->inputArg0 = { cubemap.GetWidth(), specularOutputWidth, samplesPerPixel * (level >= 1 ? (1024*1024) : 1), 0 };
             inputBuffer->inputArg1.x = cubemap.GetMaxMipLevel();
             inputBuffer->inputArg1.y = level;
             inputBuffer->inputArg1.z = outputMaxMipLevel;

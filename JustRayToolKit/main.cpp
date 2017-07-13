@@ -30,7 +30,7 @@ void PreIntegrate()
 
     JustRay::PreIntegrator preIntegrator;
     //preIntegrator.IntegrateIBLDFG("dfg", "../../Resources/output");
-    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/glacier/src", "glacier", "../../Resources/Environment/output/glacier", "glacier");
+    preIntegrator.IntegrateIBLDiffuseAndSpecular("../../Resources/Environment/grace/src", "grace", "../../Resources/Environment/grace", "grace");
 }
 float MaterialGamma(float v, bool apply)
 {
@@ -127,8 +127,8 @@ int main()
 {
     //GenMaterial("../../Resources/output/material/car_paint", "../../Resources/output/material/car_paint");
     //GenMaterial("../../Resources/output/material/brushed_metal", "../../Resources/output/material/brushed_metal");
-    GenMaterial("F:/haoxin/material/silver", "F:/haoxin/material/silver", false);
-    //PreIntegrate();
+    //GenMaterial("F:/haoxin/material/silver", "F:/haoxin/material/silver", false);
+    PreIntegrate();
     //ConvertObj();
     return 0;
 }
